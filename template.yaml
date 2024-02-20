@@ -1,0 +1,92 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  purchase-status-notification-sender
+
+  Sample SAM Template for purchase-status-notification-sender
+  
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 60
+
+Resources:
+  PurchaseStatusNotificationSenderFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: purchase-status-notification-sender
+      CodeUri: app/
+      Handler: app.handler
+      Runtime: nodejs18.x
+      Architectures:
+        - x86_64
+      Events:
+        PurchaseStatusNotificationSQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt PurchaseStatusNotificationSenderSqsQueue.Arn
+            BatchSize: 10
+      Policies:
+        - SQSPollerPolicy:
+            QueueName: !GetAtt PurchaseStatusNotificationSenderSqsQueue.QueueName
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'ses:SendTemplatedEmail'
+              Resource: '*'
+      Environment:
+        Variables:
+          SES_AWS_REGION: "us-east-1"
+          SES_SOURCE_ADDRESS: "rm349891@fiap.com.br"
+          SES_TEMPLATE_NAME: "PurchaseStatusTemplate"
+  PurchaseStatusNotificationSenderSqsDeadQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: purchase-status-notification-sender-dead-queue
+      VisibilityTimeout: 60
+  PurchaseStatusNotificationSenderSqsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: purchase-status-notification-sender-queue
+      VisibilityTimeout: 60
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt PurchaseStatusNotificationSenderSqsDeadQueue.Arn
+        maxReceiveCount: 3
+  PurchaseStatusNotificationSenderSnsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: "purchase-status-notification-sender-topic"
+  PurchaseStatusNotificationSenderSubscription:
+    Type: 'AWS::SNS::Subscription'
+    Properties:
+      TopicArn: !Ref PurchaseStatusNotificationSenderSnsTopic
+      Endpoint: !GetAtt
+        - PurchaseStatusNotificationSenderSqsQueue
+        - Arn
+      Protocol: sqs
+      RawMessageDelivery: true
+  SnsToSqsPolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Sid: "Allow SNS publish to SQS"
+            Effect: Allow
+            Principal:
+              Service: "sns.amazonaws.com"
+            Resource: !GetAtt PurchaseStatusNotificationSenderSqsQueue.Arn
+            Action: SQS:SendMessage
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref PurchaseStatusNotificationSenderSnsTopic
+      Queues:
+        - !Ref PurchaseStatusNotificationSenderSqsQueue
+
+Outputs:
+  PurchaseStatusNotificationSenderFunction:
+    Description: "PurchaseStatusNotification Sender Lambda Function ARN"
+    Value: !GetAtt PurchaseStatusNotificationSenderFunction.Arn
+  PurchaseStatusNotificationSenderFunctionIamRole:
+    Description: "Implicit IAM Role created for PurchaseStatusNotification Sender function"
+    Value: !GetAtt PurchaseStatusNotificationSenderFunctionRole.Arn
