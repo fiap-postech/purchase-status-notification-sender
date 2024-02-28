@@ -12,11 +12,11 @@ export const handler = async (event) => {
 
         const command = new SendTemplatedEmailCommand({
             Destination: {
-                ToAddresses: [body.customer.email],
+                ToAddresses: [body.email],
             },
-            Template: process.env.SES_TEMPLATE_NAME,
+            Template: body.template,
             ConfigurationSetName: "",
-            TemplateData: `{"code":"${body.code}","name":"${body.customer.name}","status":"${body.status}"}`,
+            TemplateData: JSON.stringify(body.variables),
             Source: process.env.SES_SOURCE_ADDRESS
         });
 

@@ -39,7 +39,6 @@ Resources:
         Variables:
           SES_AWS_REGION: "us-east-1"
           SES_SOURCE_ADDRESS: "rm349891@fiap.com.br"
-          SES_TEMPLATE_NAME: "PurchaseStatusTemplate"
   PurchaseStatusNotificationSenderSqsDeadQueue:
     Type: AWS::SQS::Queue
     Properties:
