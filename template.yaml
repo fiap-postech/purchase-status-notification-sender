@@ -42,12 +42,12 @@ Resources:
   PurchaseStatusNotificationSenderSqsDeadQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: purchase-status-notification-sender-dead-queue
+      QueueName: !FindInMap [PurchaseStatusNotificationSenderSqsDeadQueueName, !Ref Environment, name]
       VisibilityTimeout: 60
   PurchaseStatusNotificationSenderSqsQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: purchase-status-notification-sender-queue
+      QueueName: !FindInMap [PurchaseStatusNotificationSenderSqsQueueName, !Ref Environment, name]
       VisibilityTimeout: 60
       RedrivePolicy:
         deadLetterTargetArn: !GetAtt PurchaseStatusNotificationSenderSqsDeadQueue.Arn
@@ -55,7 +55,7 @@ Resources:
   PurchaseStatusNotificationSenderSnsTopic:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: "purchase-status-notification-sender-topic"
+      TopicName: !FindInMap [PurchaseStatusNotificationSenderSnsTopicName, !Ref Environment, name]
   PurchaseStatusNotificationSenderSubscription:
     Type: 'AWS::SNS::Subscription'
     Properties:
@@ -81,6 +81,31 @@ Resources:
                 aws:SourceArn: !Ref PurchaseStatusNotificationSenderSnsTopic
       Queues:
         - !Ref PurchaseStatusNotificationSenderSqsQueue
+
+Parameters:
+  Environment:
+    Type: String
+    Default: default
+    AllowedValues:
+      - default
+      - prod
+
+Mappings:
+  PurchaseStatusNotificationSenderSqsDeadQueueName:
+    default:
+      name: 'local-purchase-status-notification-sender-dead-queue'
+    prod:
+      name: 'prd-purchase-status-notification-sender-dead-queue'
+  PurchaseStatusNotificationSenderSqsQueueName:
+    default:
+      name: 'local-purchase-status-notification-sender-queue'
+    prod:
+      name: 'prd-purchase-status-notification-sender-queue'
+  PurchaseStatusNotificationSenderSnsTopicName:
+    default:
+      name: 'local-purchase-status-notification-topic'
+    prod:
+      name: 'prd-purchase-status-notification-topic'
 
 Outputs:
   PurchaseStatusNotificationSenderFunction:
