@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Atualização de Pedido</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f4;
+                color: #333;
+            }
+
+            .container {
+                max-width: 600px;
+                margin: 20px auto;
+                padding: 20px;
+                background-color: #fff;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+
+            h1 {
+                color: #333;
+            }
+
+            p {
+                margin-bottom: 20px;
+            }
+
+            .name {
+                font-weight: bold;
+            }
+
+            .status {
+                font-weight: bold;
+            }
+
+            .status-value {
+                font-weight: bold;
+                color: #5944af;
+            }
+
+            .payment {
+                font-weight: bold;
+            }
+
+            .code {
+                font-weight: bold;
+            }
+
+            .footer {
+                margin-top: 50px;
+                text-align: left;
+            }
+
+            .company-name {
+                color: #4783ee;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Atualização de Pedido</h1>
+            <p>Olá <span class="name">{{customername}}</span>.</p>
+            <p>O seu pedido com código <span class="code">{{purchasecode}}</span> teve uma atualização no status.</p>
+            <p><span class="status">Status:</span><span class="status-value"> {{purchasestatus}}</span>.</p>
+            <p><span class="payment">Erro no pagamento:</span> não foi possível confirmar o pagamento, por favor realize o pedido novamente.</p>
+            <p>Fique à vontade para entrar em contato se tiver alguma dúvida.</p>
+            <div class="footer">
+                <p>Atenciosamente,<br><span class="company-name">FIAP SOAT2 Grupo13</span></p>
+            </div>
+        </div>
+    </body>
+</html>
